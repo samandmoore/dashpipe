@@ -31,6 +31,12 @@ var dashClients = io
     .of('/clientz')
     .on('connection', function (socket) {
         socket.emit('changePage', { url: '/dash/232' });
+
+        io.of('/adminz').emit('clientConnected', socket.id);
+
+        socket.on('disconnect', function () {
+            io.of('/adminz').emit('clientDisconnected', socket.id);
+        })
     });
 
 var dashAdmins = io
