@@ -1,18 +1,79 @@
 <html>
     <body>
-        <iframe id="viewer" src="" style="height:100%; width:100%;"></iframe>
+        <form id="configuration">
+            <label>dash name</label>
+            <input type="text" id="config-dash-name" />
+
+            <label>start url</label>
+            <input type="text" id="config-start-url" />
+
+            <label>position</label>
+            <label>x</label><input type="text" id="config-position-x" />
+            <label>y</label><input type="text" id="config-position-y" />
+
+            <button type="submit">save configuration</button>
+        </form>
+
+        <div id="app" style="display: none;">
+            <iframe id="viewer" src="" style="height:100%; width:100%;"></iframe>
+        </div>
 
         <script src="/socket.io/socket.io.js" type="text/javascript"></script>
+
         <script type="text/javascript">
-            var $viewer = document.getElementById('viewer'),
-                socket = io.connect('http://localhost:1337/clientz');
+            var $configuration = document.getElementById('configuration'),
+                $app = document.getElementById('app');
 
-            socket.on('changePage', function (data) {
+            function onSubmitConfig(e) {
+                var name = '',
+                    startUrl = '',
+                    xPos = 0,
+                    yPos = 0;
 
-                console.log(data);
+                e.preventDefault();
 
-                $viewer.src = data.url;
-            });
+                // gather config
+                name = document.getElementById('config-dash-name').value;
+                startUrl = document.getElementById('config-start-url').value;
+                xPos = document.getElementById('config-position-x').value;
+                yPos = document.getElementById('config-position-y').value;
+
+                // start connection
+                startConnection({
+                    dashName: name,
+                    xPos: xPos,
+                    yPos: yPos
+                }, function () {
+                    console.log('connection started...');
+
+                    $configuration.style.display = 'none';
+                    $app.style.display = 'block';
+                });
+
+                return false;
+            }
+
+            function startConnection(configData, onConnectCallback) {
+                var $viewer = document.getElementById('viewer'),
+                    socket = io.connect('http://localhost:1337/clientz');
+
+                socket.on('connect', function () {
+                    onConnectCallback();
+                });
+
+                socket.on('changePage', function (data) {
+
+                    console.log(data);
+
+                    $viewer.src = data.url;
+                });
+            }
+
+            $configuration.addEventListener('submit', onSubmitConfig, false);
+        </script>
+
+        <script type="text/javascript">
+
         </script>
     </body>
 </html>
