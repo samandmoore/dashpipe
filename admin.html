@@ -1,0 +1,23 @@
+<html>
+    <body>
+        <div id="content">
+            <label>url</label>
+            <input type="text" id="url" />
+            <button type="button" id="changePage">change page</button>
+        </div>
+
+        <script src="/socket.io/socket.io.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            var urlField = document.getElementById('url'),
+                changePageBtn = document.getElementById('changePage'),
+                socket = io.connect('http://localhost:1337/adminz');
+
+            changePage.addEventListener('click', sendPage, false);
+
+            function sendPage() {
+                socket.emit('admin:changePage', { url: urlField.value });
+            }
+
+        </script>
+    </body>
+</html>
