@@ -27,14 +27,19 @@ app.get('/dash/:id', function (req, res) {
     res.render('dash', { dashId: dashId });
 });
 
+var dashClientRefs = {};
+
 var dashClients = io
     .of('/clientz')
     .on('connection', function (socket) {
+        dashClientRefs[socket.id] = socket;
+
         socket.emit('changePage', { url: '/dash/232' });
 
         io.of('/adminz').emit('clientConnected', socket.id);
 
         socket.on('disconnect', function () {
+            delete dashClientRefs[socket.id];
             io.of('/adminz').emit('clientDisconnected', socket.id);
         })
     });
@@ -43,6 +48,14 @@ var dashAdmins = io
     .of('/adminz')
     .on('connection', function (socket) {
         socket.on('admin:changePage', function (data) {
-            io.of('/clientz').emit('changePage', data);
+            var dest = null;
+
+            if (data.targetDash) {
+                dest = dashClientRefs[data.targetDash];
+            } else {
+                dest = io.of('/clientz');
+            }
+
+            dest.emit('changePage', data);
         });
     });
